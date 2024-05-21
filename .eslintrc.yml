@@ -1,0 +1,66 @@
+---
+root: true
+
+plugins:
+  - jest
+  - babel
+
+env:
+  node: true
+  jest: true
+  browser: true
+
+parser: "@babel/eslint-parser"
+
+extends:
+  - "airbnb-base"
+  - "plugin:jest/recommended"
+
+rules:
+  no-console: 0
+  import/extensions: 0
+  import/prefer-default-export: 1
+  no-trailing-spaces: 1
+  comma-dangle: ["error", "objects": "always-multiline"]
+  quote-props: ["error", "as-needed"]
+  object-curly-newline: ["error", { "multiline": true, "minProperties": 4 } ]
+  no-multiple-empty-lines: 1
+  eol-last: 1
+  arrow-body-style: 1
+  quotes: 1
+  consistent-return: 2
+  indent: ["error", 2, { "SwitchCase": 1 }]
+  no-else-return: 1
+  semi: [1, "always"]
+  space-unary-ops: 2
+  no-extra-semi: 1
+  no-mixed-spaces-and-tabs: 1
+
+#                       Мой эслинт
+# env:
+#   browser: true
+#   es2021: true
+# extends:
+#   - eslint:recommended
+# parserOptions:
+#   ecmaVersion: latest
+#   sourceType: module
+#   ecmaFeatures": 
+#     - jsx: true
+# rules:
+#   # import/prefer-default-export: 1
+#   no-trailing-spaces: 1
+#   comma-dangle: ["error", "objects": "always-multiline"]
+#   quote-props: ["error", "as-needed"]
+#   object-curly-newline: ["error", { "multiline": true, "minProperties": 4 } ]
+#   no-multiple-empty-lines: 1
+#   eol-last: 1
+#   arrow-body-style: 1
+#   # quotes: 1
+#   consistent-return: 2
+#   indent: ["error", 2, { "SwitchCase": 1 }]
+#   no-else-return: 1
+#   semi: [1, "always"]
+#   space-unary-ops: 2
+#   no-extra-semi: 1
+#   no-mixed-spaces-and-tabs: 1
