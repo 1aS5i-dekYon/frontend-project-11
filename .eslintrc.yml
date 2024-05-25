@@ -35,6 +35,7 @@ rules:
   space-unary-ops: 2
   no-extra-semi: 1
   no-mixed-spaces-and-tabs: 1
+  no-useless-return: "error"
 
 #                       Мой эслинт
 # env:
