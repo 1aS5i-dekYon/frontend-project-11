@@ -36,6 +36,7 @@ rules:
   no-extra-semi: 1
   no-mixed-spaces-and-tabs: 1
   no-useless-return: "error"
+  no-param-reassign: 0
 
 #                       Мой эслинт
 # env:
