@@ -1,4 +1,4 @@
-import yup, { setLocale } from 'yup';
+import { string, setLocale } from 'yup';
 import i18next from 'i18next';
 import axios from 'axios';
 import renderRssForm from './view.js';
@@ -103,7 +103,7 @@ export default () => {
 
     const loadedFeeds = Object.values(state.feeds).map((item) => item.url);
 
-    const formSchema = yup.string()
+    const formSchema = string()
       .url()
       .required()
       .notOneOf(loadedFeeds);
