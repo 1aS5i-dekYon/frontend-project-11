@@ -3,13 +3,11 @@ import onChange from 'on-change';
 const createEl = (tagName, style = '', text = '') => {
   const element = document.createElement(tagName);
   if (style) element.classList.add(...style);
-  if (text) element.textContent = text;
+  if (text) element.innerHTML = text;
   return element;
 };
 
-const makeBoxFor = (els = '', text = '') => {
-  const container = document.querySelector('.feeds');
-
+const makeBoxFor = (container, els = '', text = '') => {
   const cardBorder = createEl('div', ['card-border-0']);
   const cardBody = createEl('div', ['card-body']);
   const title = createEl('h2', ['card-title', 'h4'], text);
@@ -43,28 +41,44 @@ const makePostsBox = (value, text) => {
     el.append(link, button);
     return el;
   });
-  makeBoxFor(postsList, text);
+  const containerPosts = document.querySelector('.posts');
+  makeBoxFor(containerPosts, postsList, text);
 };
 
 const makeFeedsBox = (feeds, text) => {
   const feedsList = feeds.map(({ descriptionFeed, titleFeed }) => {
     const elList = createEl('li', ['list-group-item', 'border-0', 'border-end-0']);
-    const titleEl = createEl('li', '', titleFeed);
-    const descriptionEl = createEl('li', ['m-0 small', 'text-black-50'], descriptionFeed);
-    return elList.append(titleEl, descriptionEl);
+    const titleEl = createEl('h3', ['h6', 'm-0'], titleFeed);
+    const descriptionEl = createEl('p', ['m-0', 'small', 'text-black-50'], descriptionFeed);
+    elList.append(titleEl, descriptionEl);
+    return elList;
   });
-  makeBoxFor(feedsList, text);
+  const containerFeeds = document.querySelector('.feeds');
+  makeBoxFor(containerFeeds, feedsList, text);
 };
+/*
+  <li class="list-group-item border-0 border-end-0">
+    <h3 class="h6 m-0">ArchDaily</h3>
+    <p class="m-0 small text-black-50">ArchDaily | Broadcasting Architecture Worldwide</p>
+  </li>
+*/
 
 const makeSuccessParagraph = (input, p, text) => {
+  console.log('success');
   input.classList.remove('is-invalid');
   input.classList.add('is-valid');
+  p.classList.remove('text-danger');
+  p.classList.add('text-success');
   p.innerHTML = text;
 };
 const makeDangerParagraph = (input, p, text) => {
+  console.log(text, 'textError');
   input.classList.remove('is-valid');
   input.classList.add('is-invalid');
+  p.classList.remove('text-success');
+  p.classList.add('text-danger');
   p.innerHTML = text;
+  console.log(p, input, 'crash');
 };
 
 export default (state, i18nextInstance) => onChange(state, (path, value) => {
@@ -74,11 +88,12 @@ export default (state, i18nextInstance) => onChange(state, (path, value) => {
     case 'process':
       break;
     case 'form.error':
-      makeDangerParagraph(urlInput, p, i18nextInstance.t(state[path]));
+      // eslint-disable-next-line no-undef
+      makeDangerParagraph(urlInput, p, i18nextInstance.t(state.form.error));
       break;
     case 'feeds':
       makeFeedsBox(value, i18nextInstance.t('titleFeeds'));
-      makeSuccessParagraph(urlInput, p, i18nextInstance.t(state.validUrl));
+      makeSuccessParagraph(urlInput, p, i18nextInstance.t('validUrl'));
       break;
     case 'posts':
       makePostsBox(value, i18nextInstance.t('titlePosts'));

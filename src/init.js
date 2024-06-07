@@ -15,48 +15,63 @@ const makeFeedId = () => {
 };
 
 const makeFeed = (feedId, doc, url) => {
-  const titleFeed = doc.querySelector('title');
-  const descriptionFeed = doc.querySelector('description');
+  //
+  console.log(doc, 123);
+  //
+  const titleFeed = doc.querySelector('title').textContent;
+  const descriptionFeed = doc.querySelector('description').textContent;
   return {
     feedId, titleFeed, descriptionFeed, url,
   };
 };
 const makePosts = (feedId, doc) => {
   const items = doc.querySelectorAll('item');
-  const posts = items.forEach((el) => {
+  console.log(items);
+  const posts = [];
+  items.forEach((el) => {
     makePostId();
     const postId = lastPostId;
-    const titlePost = el.querySelector('title');
-    const descriptionPost = el.querySelector('description');
-    return {
+    const titlePost = el.querySelector('title').textContent;
+    const descriptionPost = el.querySelector('description').textContent;
+    console.log(titlePost, descriptionPost, postId);
+    posts.push({
       postId, feedId, titlePost, descriptionPost,
-    };
+    });
   });
+  console.log(posts, 'in makePosts');
   return posts;
 };
 
 const getHttpResponseData = (url) => axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${url}`)
-  .then((response) => response.data)
-  .catch(() => new Error('networkError'));
+  .then((response) => response.data.contents)
+  .catch(() => new Error('errors.networkError'));
 
 const getParsedDataRss = (data) => {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(data, 'application/xml');
+  console.log(data, 'data before');
+  const doc = parser.parseFromString(data, 'text/xml');
+  console.log(doc, 'parsing');
   const errorNode = doc.querySelector('parsererror');
   if (errorNode) {
-    return new Error('noRSS');
+    return new Error('errors.noRSS');
   }
   return doc;
+};
+
+const autoUpdatePosts = (watchedState) => {
+  // извлекаем из фидов линки и вызывает каждый
+  // получаем данные, парсим
+  // если появились новые посты, то создаем новые и изменяем всем postId
 };
 
 export default () => {
   setLocale({
     mixed: {
-      default: 'default',
-      required: 'empty',
-      notOneOf: 'alreadyExists',
+      default: 'errors.default',
+      required: 'errors.empty',
+      notOneOf: 'errors.alreadyExists',
     },
-    string: { url: 'invalidUrl' },
+    string: { url: 'errors.invalidUrl' },
   });
 
   const i18nextInstance = i18next.createInstance();
@@ -102,7 +117,6 @@ export default () => {
     const url = formData.get('url');
 
     const loadedFeeds = Object.values(state.feeds).map((item) => item.url);
-
     const formSchema = string()
       .url()
       .required()
@@ -115,19 +129,26 @@ export default () => {
       .then(() => getHttpResponseData(url))
       .then((data) => getParsedDataRss(data))
       .then((docXML) => {
-        // отправляем url  в feed и не паримся, а извлечет посты из него уже Fn с setTimeout!!!
-        // все что ниже удалаяем отсюда и пихаем в эту Fn
         makeFeedId();
+        console.log('before makeFeed');
         const newFeed = makeFeed(lastFeedId, docXML, url);
+        console.log('after makeFeed and before makePosts');
         const newPosts = makePosts(lastFeedId, docXML);
-
+        console.log(newPosts);
+        console.log('after makePosts');
         watchedState.feeds.push(newFeed);
+        console.log('after push newFeed');
         watchedState.posts.push(...newPosts);
+        console.log('after push newPosts');
         // после setTimeout обновляются все ID постов и фидов ...
         // ... (lastFeedId и lastPostId присваиваются нулю)
+        autoUpdatePosts(watchedState);
+
         // modal создается в начале body и обновляется по клику на новый пост
+        // npx webpack serve
       })
       .catch((error) => {
+        console.log(error.message, 'error.message');
         watchedState.form.error = error.message ?? 'default';
       });
   });
