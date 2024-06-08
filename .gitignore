@@ -1,2 +1,5 @@
-node_modules
+/node_modules/
+*.log
+dist
+assets
 __fixtures__/demo.cast
