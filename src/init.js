@@ -33,9 +33,10 @@ const makePosts = (feedId, doc) => {
     const postId = lastPostId;
     const titlePost = el.querySelector('title').textContent;
     const descriptionPost = el.querySelector('description').textContent;
-    console.log(titlePost, descriptionPost, postId);
+    const postLink = el.querySelector('link').textContent;
+    console.log(titlePost, descriptionPost, postId, postLink);
     posts.push({
-      postId, feedId, titlePost, descriptionPost,
+      postId, feedId, titlePost, descriptionPost, postLink,
     });
   });
   console.log(posts, 'in makePosts');
@@ -58,10 +59,32 @@ const getParsedDataRss = (data) => {
   return doc;
 };
 
-const autoUpdatePosts = (watchedState) => {
-  // извлекаем из фидов линки и вызывает каждый
-  // получаем данные, парсим
-  // если появились новые посты, то создаем новые и изменяем всем postId
+const autoUpdatePosts = (watchedState, feed, timeout = 5000) => {
+  const looper = () => {
+    // сделать промис из парсера
+    getHttpResponseData(feed.url)
+      .then((data) => getParsedDataRss(data))
+      .then((doc) => {
+        const postsUrls = watchedState.posts
+          .filter((post) => feed.feedId === post.feedId)
+          .map(({ link }) => link);
+        const items = doc.querySelectorAll('item');
+        const newItems = [];
+        items.forEach(({ link }) => {
+          if (!postsUrls.includes(link)) newItems.push(link);
+        });
+
+        if (newItems.length > 0) {
+          const posts = makePosts(feed.feedId, items);
+          watchedState.posts.push(...posts);
+        }
+      })
+      .catch(console.log)
+      .finally(() => {
+        setTimeout(looper, timeout);
+      });
+  };
+  setTimeout(looper, timeout);
 };
 
 export default () => {
@@ -140,12 +163,7 @@ export default () => {
         console.log('after push newFeed');
         watchedState.posts.push(...newPosts);
         console.log('after push newPosts');
-        // после setTimeout обновляются все ID постов и фидов ...
-        // ... (lastFeedId и lastPostId присваиваются нулю)
-        autoUpdatePosts(watchedState);
-
-        // modal создается в начале body и обновляется по клику на новый пост
-        // npx webpack serve
+        autoUpdatePosts(watchedState, newFeed);
       })
       .catch((error) => {
         console.log(error.message, 'error.message');

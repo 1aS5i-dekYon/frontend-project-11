@@ -56,12 +56,6 @@ const makeFeedsBox = (feeds, text) => {
   const containerFeeds = document.querySelector('.feeds');
   makeBoxFor(containerFeeds, feedsList, text);
 };
-/*
-  <li class="list-group-item border-0 border-end-0">
-    <h3 class="h6 m-0">ArchDaily</h3>
-    <p class="m-0 small text-black-50">ArchDaily | Broadcasting Architecture Worldwide</p>
-  </li>
-*/
 
 const makeSuccessParagraph = (input, p, text) => {
   console.log('success');
