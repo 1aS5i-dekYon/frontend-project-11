@@ -23,11 +23,12 @@ const makePostsBox = (value, text) => {
   const postsList = value.map((post) => {
     const el = createEl('li', [
       'list-group-item', 'd-flex', 'justify-content-between',
-      'align-items-start', 'border-0', 'border-end-0']);
+      'align-items-start', 'border-0', 'border-end-0'
+    ]);
 
     const link = createEl('a', ['fw-bold']);
     link.setAttribute('data-id', post.postId);
-    link.setAttribute('href', post.link);
+    link.setAttribute('href', post.postLink);
     link.setAttribute('target', '_blank');
     link.setAttribute('rel', 'noopener noreferrer');
     link.textContent = post.titlePost;
@@ -37,6 +38,7 @@ const makePostsBox = (value, text) => {
     button.setAttribute('data-id', post.postId);
     button.setAttribute('data-bs-toggle', 'modal');
     button.setAttribute('data-bs-target', '#modal');
+    button.textContent = 'Просмотр';
 
     el.append(link, button);
     return el;
@@ -74,6 +76,22 @@ const makeDangerParagraph = (input, p, text) => {
   p.innerHTML = text;
   console.log(p, input, 'crash');
 };
+const fillModalEl = (value) => {
+  const titleModal = document.querySelector('.modal-title');
+  const bodyModal = document.querySelector('.modal-body');
+  const buttonLink = document.querySelector('.full-article');
+
+  titleModal.innerHTML = value.titlePost;
+  bodyModal.innerHTML = value.descriptionPost;
+  buttonLink.href = value.postLink;
+  console.log('modal filling done');
+};
+
+const hidePost = (id) => {
+  const targetPost = document.querySelector(`[data-id='${id}']`);
+  targetPost.classList.remove('fw-bold');
+  targetPost.classList.add('fw-normal', 'gray');
+};
 
 export default (state, i18nextInstance) => onChange(state, (path, value) => {
   const urlInput = document.querySelector('#url-input');
@@ -91,6 +109,12 @@ export default (state, i18nextInstance) => onChange(state, (path, value) => {
       break;
     case 'posts':
       makePostsBox(value, i18nextInstance.t('titlePosts'));
+      break;
+    case 'modal':
+      fillModalEl(value);
+      break;
+    case 'readPostIds':
+      hidePost(value.at(-1));
       break;
     default:
       throw new Error('boom');

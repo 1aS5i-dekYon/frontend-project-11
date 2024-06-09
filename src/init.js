@@ -127,11 +127,20 @@ export default () => {
       fields: { url: '' },
       error: '',
     },
+    modal: {
+      postLink: '',
+      titlePost: '',
+      descriptionPost: '',
+    },
     feeds: [],
     posts: [],
+    readPostIds: [],
   };
 
   const watchedState = renderRssForm(state, i18nextInstance);
+
+  const containerPosts = document.querySelector('.posts');
+  const buttonsPosts = [];
 
   const rssForm = document.querySelector('.rss-form');
   rssForm.addEventListener('submit', (e) => {
@@ -162,6 +171,9 @@ export default () => {
         watchedState.feeds.push(newFeed);
         console.log('after push newFeed');
         watchedState.posts.push(...newPosts);
+
+        buttonsPosts.push(...containerPosts.querySelectorAll('button'));
+        console.log(...buttonsPosts, 'buttonsPosts');
         console.log('after push newPosts');
         autoUpdatePosts(watchedState, newFeed);
       })
@@ -169,5 +181,20 @@ export default () => {
         console.log(error.message, 'error.message');
         watchedState.form.error = error.message ?? 'default';
       });
+  });
+
+  containerPosts.addEventListener('click', (e) => {
+    if (e.target.dataset.bsTarget === '#modal') {
+      const targetPostId = parseInt(e.target.dataset.id, 10);
+      const targetPost = watchedState.posts.find((post) => post.postId === targetPostId);
+      const {
+        titlePost, descriptionPost,
+        postLink, postId,
+      } = targetPost;
+
+      watchedState.modal = { postLink, titlePost, descriptionPost };
+      console.log(targetPost, watchedState.modal, 'modal');
+      watchedState.readPostIds.push(postId);
+    }
   });
 };
