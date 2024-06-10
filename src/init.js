@@ -15,9 +15,6 @@ const makeFeedId = () => {
 };
 
 const makeFeed = (feedId, doc, url) => {
-  //
-  console.log(doc, 123);
-  //
   const titleFeed = doc.querySelector('title').textContent;
   const descriptionFeed = doc.querySelector('description').textContent;
   return {
@@ -26,7 +23,6 @@ const makeFeed = (feedId, doc, url) => {
 };
 const makePosts = (feedId, doc) => {
   const items = doc.querySelectorAll('item');
-  console.log(items);
   const posts = [];
   items.forEach((el) => {
     makePostId();
@@ -34,12 +30,10 @@ const makePosts = (feedId, doc) => {
     const titlePost = el.querySelector('title').textContent;
     const descriptionPost = el.querySelector('description').textContent;
     const postLink = el.querySelector('link').textContent;
-    console.log(titlePost, descriptionPost, postId, postLink);
     posts.push({
       postId, feedId, titlePost, descriptionPost, postLink,
     });
   });
-  console.log(posts, 'in makePosts');
   return posts;
 };
 
@@ -49,9 +43,7 @@ const getHttpResponseData = (url) => axios.get(`https://allorigins.hexlet.app/ge
 
 const getParsedDataRss = (data) => {
   const parser = new DOMParser();
-  console.log(data, 'data before');
   const doc = parser.parseFromString(data, 'text/xml');
-  console.log(doc, 'parsing');
   const errorNode = doc.querySelector('parsererror');
   if (errorNode) {
     return new Error('errors.noRSS');
@@ -61,7 +53,6 @@ const getParsedDataRss = (data) => {
 
 const autoUpdatePosts = (watchedState, feed, timeout = 5000) => {
   const looper = () => {
-    // сделать промис из парсера
     getHttpResponseData(feed.url)
       .then((data) => getParsedDataRss(data))
       .then((doc) => {
@@ -145,10 +136,11 @@ export default () => {
   const rssForm = document.querySelector('.rss-form');
   rssForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    watchedState.form.error = '';
     const formData = new FormData(e.target);
     const url = formData.get('url');
 
-    const loadedFeeds = Object.values(state.feeds).map((item) => item.url);
+    const loadedFeeds = Object.values(watchedState.feeds).map((item) => item.url);
     const formSchema = string()
       .url()
       .required()
@@ -162,23 +154,17 @@ export default () => {
       .then((data) => getParsedDataRss(data))
       .then((docXML) => {
         makeFeedId();
-        console.log('before makeFeed');
         const newFeed = makeFeed(lastFeedId, docXML, url);
-        console.log('after makeFeed and before makePosts');
         const newPosts = makePosts(lastFeedId, docXML);
-        console.log(newPosts);
-        console.log('after makePosts');
+
         watchedState.feeds.push(newFeed);
-        console.log('after push newFeed');
         watchedState.posts.push(...newPosts);
 
         buttonsPosts.push(...containerPosts.querySelectorAll('button'));
-        console.log(...buttonsPosts, 'buttonsPosts');
-        console.log('after push newPosts');
+
         autoUpdatePosts(watchedState, newFeed);
       })
       .catch((error) => {
-        console.log(error.message, 'error.message');
         watchedState.form.error = error.message ?? 'default';
       });
   });
@@ -193,7 +179,6 @@ export default () => {
       } = targetPost;
 
       watchedState.modal = { postLink, titlePost, descriptionPost };
-      console.log(targetPost, watchedState.modal, 'modal');
       watchedState.readPostIds.push(postId);
     }
   });

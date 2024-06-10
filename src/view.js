@@ -60,7 +60,6 @@ const makeFeedsBox = (feeds, text) => {
 };
 
 const makeSuccessParagraph = (input, p, text) => {
-  console.log('success');
   input.classList.remove('is-invalid');
   input.classList.add('is-valid');
   p.classList.remove('text-danger');
@@ -68,13 +67,11 @@ const makeSuccessParagraph = (input, p, text) => {
   p.innerHTML = text;
 };
 const makeDangerParagraph = (input, p, text) => {
-  console.log(text, 'textError');
   input.classList.remove('is-valid');
   input.classList.add('is-invalid');
   p.classList.remove('text-success');
   p.classList.add('text-danger');
   p.innerHTML = text;
-  console.log(p, input, 'crash');
 };
 const fillModalEl = (value) => {
   const titleModal = document.querySelector('.modal-title');
@@ -84,7 +81,6 @@ const fillModalEl = (value) => {
   titleModal.innerHTML = value.titlePost;
   bodyModal.innerHTML = value.descriptionPost;
   buttonLink.href = value.postLink;
-  console.log('modal filling done');
 };
 
 const hidePost = (id) => {
@@ -100,7 +96,6 @@ export default (state, i18nextInstance) => onChange(state, (path, value) => {
     case 'process':
       break;
     case 'form.error':
-      // eslint-disable-next-line no-undef
       makeDangerParagraph(urlInput, p, i18nextInstance.t(state.form.error));
       break;
     case 'feeds':
