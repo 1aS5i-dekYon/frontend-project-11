@@ -39,14 +39,17 @@ const makePosts = (feedId, doc) => {
 
 const getHttpResponseData = (url) => axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${url}`)
   .then((response) => response.data.contents)
-  .catch(() => new Error('errors.networkError'));
+  .catch(() => {
+    throw new Error('errors.networkError');
+  });
 
 const getParsedDataRss = (data) => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(data, 'text/xml');
   const errorNode = doc.querySelector('parsererror');
   if (errorNode) {
-    return new Error('errors.noRSS');
+    console.log(errorNode);
+    throw new Error('errors.noRSS');
   }
   return doc;
 };
