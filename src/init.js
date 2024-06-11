@@ -163,6 +163,7 @@ export default () => {
         buttonsPosts.push(...containerPosts.querySelectorAll('button'));
 
         autoUpdatePosts(watchedState, newFeed);
+        e.target.reset();
       })
       .catch((error) => {
         watchedState.form.error = error.message ?? 'default';
