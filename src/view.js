@@ -23,7 +23,7 @@ const makePostsBox = (value, text) => {
   const postsList = value.map((post) => {
     const el = createEl('li', [
       'list-group-item', 'd-flex', 'justify-content-between',
-      'align-items-start', 'border-0', 'border-end-0'
+      'align-items-start', 'border-0', 'border-end-0',
     ]);
 
     const link = createEl('a', ['fw-bold']);

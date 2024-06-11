@@ -1,7 +1,7 @@
 import { string, setLocale } from 'yup';
 import i18next from 'i18next';
 import axios from 'axios';
-import renderRssForm from './view.js';
+import displayRssForm from './view.js';
 
 let lastPostId = 0;
 const makePostId = () => {
@@ -131,7 +131,7 @@ export default () => {
     readPostIds: [],
   };
 
-  const watchedState = renderRssForm(state, i18nextInstance);
+  const watchedState = displayRssForm(state, i18nextInstance);
 
   const containerPosts = document.querySelector('.posts');
   const buttonsPosts = [];
