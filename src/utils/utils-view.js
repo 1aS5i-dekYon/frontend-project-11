@@ -1,3 +1,4 @@
+/* eslint-disable comma-dangle */
 const createEl = (tagName, style = '', text = '') => {
   const element = document.createElement(tagName);
   if (style) element.classList.add(...style);
@@ -21,7 +22,7 @@ const makePostsEls = (posts, readPostIds, buttonName = '') => {
   const postsList = posts.map((post) => {
     const el = createEl('li', [
       'list-group-item', 'd-flex', 'justify-content-between',
-      'align-items-start', 'border-0', 'border-end-0'
+      'align-items-start', 'border-0', 'border-end-0',
     ]);
 
     const linkStyle = readPostIds.has(post.postId) ? 'fw-normal' : 'fw-bold';
