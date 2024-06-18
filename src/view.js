@@ -1,117 +1,78 @@
 import onChange from 'on-change';
+import { makeBoxFor, makeFeedsEls, makePostsEls } from './utils/utils-view.js';
 
-const createEl = (tagName, style = '', text = '') => {
-  const element = document.createElement(tagName);
-  if (style) element.classList.add(...style);
-  if (text) element.innerHTML = text;
-  return element;
+const displayInterfaceLng = (elements, i18nextInstance) => {
+  elements.init.readCompletelyEl.textContent = i18nextInstance.t('elsInit.readCompletely');
+  elements.init.close.textContent = i18nextInstance.t('elsInit.close');
+  elements.init.projectTitle.textContent = i18nextInstance.t('elsInit.projectTitle');
+  elements.init.startRead.textContent = i18nextInstance.t('elsInit.startRead');
+  elements.init.labelRss.textContent = i18nextInstance.t('elsInit.placeholder');
+  elements.init.addButton.textContent = i18nextInstance.t('elsInit.add');
+  elements.init.exampleRss.textContent = i18nextInstance.t('elsInit.exampleRss');
 };
 
-const makeBoxFor = (container, els = '', text = '') => {
-  const cardBorder = createEl('div', ['card-border-0']);
-  const cardBody = createEl('div', ['card-body']);
-  const title = createEl('h2', ['card-title', 'h4'], text);
-  const list = createEl('ul', ['list-group', 'border-0', 'rounded-0']);
-
-  list.append(...els);
-  cardBody.append(title);
-  cardBorder.append(cardBody, list);
-  container.replaceChildren(cardBorder);
+const makeSuccessParagraph = (elements, text) => {
+  elements.urlInput.classList.remove('is-invalid');
+  elements.urlInput.classList.add('is-valid');
+  elements.feedback.classList.remove('text-danger');
+  elements.feedback.classList.add('text-success');
+  elements.feedback.innerHTML = text;
 };
 
-const makePostsBox = (value, text) => {
-  const postsList = value.map((post) => {
-    const el = createEl('li', [
-      'list-group-item', 'd-flex', 'justify-content-between',
-      'align-items-start', 'border-0', 'border-end-0',
-    ]);
-
-    const link = createEl('a', ['fw-bold']);
-    link.setAttribute('data-id', post.postId);
-    link.setAttribute('href', post.postLink);
-    link.setAttribute('target', '_blank');
-    link.setAttribute('rel', 'noopener noreferrer');
-    link.textContent = post.titlePost;
-
-    const button = createEl('button', ['btn', 'btn-outline-primary', 'btn-sm']);
-    button.setAttribute('type', 'button');
-    button.setAttribute('data-id', post.postId);
-    button.setAttribute('data-bs-toggle', 'modal');
-    button.setAttribute('data-bs-target', '#modal');
-    button.textContent = 'Просмотр';
-
-    el.append(link, button);
-    return el;
-  });
-  const containerPosts = document.querySelector('.posts');
-  makeBoxFor(containerPosts, postsList, text);
+const makeDangerParagraph = (elements, text) => {
+  elements.urlInput.classList.remove('is-valid');
+  elements.urlInput.classList.add('is-invalid');
+  elements.feedback.classList.remove('text-success');
+  elements.feedback.classList.add('text-danger');
+  elements.feedback.innerHTML = text;
 };
 
-const makeFeedsBox = (feeds, text) => {
-  const feedsList = feeds.map(({ descriptionFeed, titleFeed }) => {
-    const elList = createEl('li', ['list-group-item', 'border-0', 'border-end-0']);
-    const titleEl = createEl('h3', ['h6', 'm-0'], titleFeed);
-    const descriptionEl = createEl('p', ['m-0', 'small', 'text-black-50'], descriptionFeed);
-    elList.append(titleEl, descriptionEl);
-    return elList;
-  });
-  const containerFeeds = document.querySelector('.feeds');
-  makeBoxFor(containerFeeds, feedsList, text);
+const proccessActions = {
+  initialization: (elements, i18nextInstance) => displayInterfaceLng(elements, i18nextInstance),
+  somethingElse: '',
 };
 
-const makeSuccessParagraph = (input, p, text) => {
-  input.classList.remove('is-invalid');
-  input.classList.add('is-valid');
-  p.classList.remove('text-danger');
-  p.classList.add('text-success');
-  p.innerHTML = text;
-};
-const makeDangerParagraph = (input, p, text) => {
-  input.classList.remove('is-valid');
-  input.classList.add('is-invalid');
-  p.classList.remove('text-success');
-  p.classList.add('text-danger');
-  p.innerHTML = text;
-};
-const fillModalEl = (value) => {
-  const titleModal = document.querySelector('.modal-title');
-  const bodyModal = document.querySelector('.modal-body');
-  const buttonLink = document.querySelector('.full-article');
-
-  titleModal.innerHTML = value.titlePost;
-  bodyModal.innerHTML = value.descriptionPost;
-  buttonLink.href = value.postLink;
+const displayFeeds = (feedsEls, i18nextInstance, feeds) => {
+  const feedsList = makeFeedsEls(feeds);
+  const cardBorderFeeds = makeBoxFor(feedsList, i18nextInstance.t('titleFeeds'));
+  feedsEls.replaceChildren(cardBorderFeeds);
 };
 
-const hidePost = (id) => {
-  const targetPost = document.querySelector(`[data-id='${id}']`);
-  targetPost.classList.remove('fw-bold');
-  targetPost.classList.add('fw-normal', 'gray');
+const displayPosts = (postsEls, i18nextInstance, posts, readPostIds) => {
+  const postsList = makePostsEls(posts, readPostIds, i18nextInstance.t('preview'));
+  const cardBorderPosts = makeBoxFor(postsList, i18nextInstance.t('titlePosts'));
+  postsEls.replaceChildren(cardBorderPosts);
 };
 
-export default (state, i18nextInstance) => onChange(state, (path, value) => {
-  const urlInput = document.querySelector('#url-input');
-  const p = document.querySelector('.feedback');
+export default (state, elements, i18nextInstance) => onChange(state, (path, value) => {
   switch (path) {
     case 'process':
+      proccessActions[value](elements, i18nextInstance);
       break;
     case 'form.error':
-      makeDangerParagraph(urlInput, p, i18nextInstance.t(state.form.error));
+      makeDangerParagraph(elements, i18nextInstance.t(state.form.error));
       break;
+
     case 'feeds':
-      makeFeedsBox(value, i18nextInstance.t('titleFeeds'));
-      makeSuccessParagraph(urlInput, p, i18nextInstance.t('validUrl'));
+      displayFeeds(elements.feeds, i18nextInstance, value);
+      makeSuccessParagraph(elements, i18nextInstance.t('validUrl'));
       break;
+
     case 'posts':
-      makePostsBox(value, i18nextInstance.t('titlePosts'));
+      displayPosts(elements.posts, i18nextInstance, value, state.readPostIds);
       break;
+
     case 'modal':
-      fillModalEl(value);
+      elements.modal.title.innerHTML = value.titlePost;
+      elements.modal.body.innerHTML = value.descriptionPost;
+      elements.modal.buttonLink.href = value.postLink;
       break;
+
     case 'readPostIds':
-      hidePost(value.at(-1));
+      displayPosts(elements.posts, i18nextInstance, state.posts, state.readPostIds);
       break;
+
     default:
-      throw new Error('boom');
+      throw new Error('errorSwitchConstruction');
   }
 });

@@ -21,7 +21,7 @@ rules:
   import/extensions: 0
   import/prefer-default-export: 1
   no-trailing-spaces: 1
-  comma-dangle: ["error", "objects": "always-multiline", "arrays": "always-multiline"]
+  comma-dangle: ["error", "objects": "always-multiline"]
   quote-props: ["error", "as-needed"]
   object-curly-newline: ["error", { "multiline": true, "minProperties": 4 } ]
   no-multiple-empty-lines: 1

@@ -1,6 +1,7 @@
 import { string, setLocale } from 'yup';
 import i18next from 'i18next';
 import axios from 'axios';
+import resources from './languages/index.js';
 import displayRssForm from './view.js';
 
 let lastPostId = 0;
@@ -21,8 +22,8 @@ const makeFeed = (feedId, doc, url) => {
     feedId, titleFeed, descriptionFeed, url,
   };
 };
-const makePosts = (feedId, doc) => {
-  const items = doc.querySelectorAll('item');
+const makePosts = (feedId, docXml) => {
+  const items = docXml.querySelectorAll('item');
   const posts = [];
   items.forEach((el) => {
     makePostId();
@@ -37,7 +38,16 @@ const makePosts = (feedId, doc) => {
   return posts;
 };
 
-const getHttpResponseData = (url) => axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${url}`)
+const getAllOriginsUrl = (url) => {
+  const allOriginsLink = 'https://allorigins.hexlet.app/get';
+  const finalUrl = new URL(allOriginsLink);
+  finalUrl.searchParams.set('disableCache', 'true');
+  finalUrl.searchParams.set('url', url);
+
+  return finalUrl;
+};
+
+const getHttpResponseData = (url) => axios.get(getAllOriginsUrl(url))
   .then((response) => response.data.contents)
   .catch(() => {
     throw new Error('errors.networkError');
@@ -82,6 +92,29 @@ const autoUpdatePosts = (watchedState, feed, timeout = 5000) => {
 };
 
 export default () => {
+  const elements = {
+    init: {
+      readCompletelyEl: document.querySelector('.full-article'),
+      close: document.querySelector('.modal-footer > button'),
+      projectTitle: document.querySelector('h1'),
+      startRead: document.querySelector('.lead'),
+      labelRss: document.querySelector('label[for="url-input"]'),
+      addButton: document.querySelector('button[type="submit"]'),
+      exampleRss: document.querySelector('.text-muted'),
+    },
+    form: document.querySelector('.rss-form'),
+    urlInput: document.getElementById('url-input'),
+    feedback: document.querySelector('.feedback'),
+    exampleUrl: document.querySelector('.example-url'),
+    feeds: document.querySelector('.feeds'),
+    posts: document.querySelector('.posts'),
+    modal: {
+      title: document.querySelector('.modal-title'),
+      body: document.querySelector('.modal-body'),
+      buttonLink: document.querySelector('.full-article'),
+    },
+  };
+
   setLocale({
     mixed: {
       default: 'errors.default',
@@ -95,32 +128,12 @@ export default () => {
   i18nextInstance.init({
     lng: 'ru',
     debug: false,
-    resources: {
-      ru: {
-        translation: {
-          titleFeeds: 'Фиды',
-          titlePosts: 'Посты',
-          preview: 'Просмотр',
-          validUrl: 'RSS успешно загружен',
-          errors: {
-            invalidUrl: 'Ссылка должна быть валидным URL',
-            empty: 'Не должно быть пустым',
-            alreadyExists: 'RSS уже существует',
-            noRSS: 'Ресурс не содержит валидный RSS',
-            networkError: 'Ошибка сети',
-            default: 'Неизвестная ошибка. Что-то пошло не так',
-          },
-        },
-      },
-    },
+    resources,
   });
 
   const state = {
     process: '',
-    form: {
-      fields: { url: '' },
-      error: '',
-    },
+    form: { error: '' },
     modal: {
       postLink: '',
       titlePost: '',
@@ -128,13 +141,11 @@ export default () => {
     },
     feeds: [],
     posts: [],
-    readPostIds: [],
+    readPostIds: new Set(),
   };
 
-  const watchedState = displayRssForm(state, i18nextInstance);
-
-  const containerPosts = document.querySelector('.posts');
-  const buttonsPosts = [];
+  const watchedState = displayRssForm(state, elements, i18nextInstance);
+  watchedState.process = 'initialization';
 
   const rssForm = document.querySelector('.rss-form');
   rssForm.addEventListener('submit', (e) => {
@@ -148,9 +159,8 @@ export default () => {
       .url()
       .required()
       .notOneOf(loadedFeeds);
-    // 'http://feeds.feedburner.com/Archdaily'
+    // http://feeds.feedburner.com/Archdaily
     // https://www.aljazeera.com/xml/rss/all.xml
-    watchedState.process = 'filling';
     formSchema
       .validate(url)
       .then(() => getHttpResponseData(url))
@@ -163,8 +173,6 @@ export default () => {
         watchedState.feeds.push(newFeed);
         watchedState.posts.push(...newPosts);
 
-        buttonsPosts.push(...containerPosts.querySelectorAll('button'));
-
         autoUpdatePosts(watchedState, newFeed);
         e.target.reset();
       })
@@ -173,7 +181,7 @@ export default () => {
       });
   });
 
-  containerPosts.addEventListener('click', (e) => {
+  elements.posts.addEventListener('click', (e) => {
     if (e.target.dataset.bsTarget === '#modal') {
       const targetPostId = parseInt(e.target.dataset.id, 10);
       const targetPost = watchedState.posts.find((post) => post.postId === targetPostId);
@@ -183,7 +191,7 @@ export default () => {
       } = targetPost;
 
       watchedState.modal = { postLink, titlePost, descriptionPost };
-      watchedState.readPostIds.push(postId);
+      watchedState.readPostIds.add(postId);
     }
   });
 };
