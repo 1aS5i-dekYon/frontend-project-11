@@ -2,8 +2,8 @@ export default {
   translation: {
     titleFeeds: 'Фиды',
     titlePosts: 'Посты',
+    preview: 'Просмотр',
     elsInit: {
-      preview: 'Просмотр',
       readCompletely: 'Читать полностью',
       close: 'Закрыть',
       projectTitle: 'RSS агрегатор',

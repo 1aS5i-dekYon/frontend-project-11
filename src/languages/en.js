@@ -2,8 +2,8 @@ export default {
   translation: {
     titleFeeds: 'Feeds',
     titlePosts: 'Posts',
+    preview: 'Preview',
     elsInit: {
-      preview: 'Preview',
       readCompletely: 'Read completely',
       close: 'Close',
       projectTitle: 'RSS aggregator',
