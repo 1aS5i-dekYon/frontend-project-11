@@ -27,11 +27,6 @@ const makeDangerParagraph = (elements, text) => {
   elements.feedback.innerHTML = text;
 };
 
-const proccessActions = {
-  initialization: (elements, i18nextInstance) => displayInterfaceLng(elements, i18nextInstance),
-  somethingElse: '',
-};
-
 const displayFeeds = (feedsEls, i18nextInstance, feeds) => {
   const feedsList = makeFeedsEls(feeds);
   const cardBorderFeeds = makeBoxFor(feedsList, i18nextInstance.t('titleFeeds'));
@@ -47,7 +42,7 @@ const displayPosts = (postsEls, i18nextInstance, posts, readPostIds) => {
 export default (state, elements, i18nextInstance) => onChange(state, (path, value) => {
   switch (path) {
     case 'process':
-      proccessActions[value](elements, i18nextInstance);
+      if (value === 'initialization') displayInterfaceLng(elements, i18nextInstance);
       break;
     case 'form.error':
       makeDangerParagraph(elements, i18nextInstance.t(state.form.error));
